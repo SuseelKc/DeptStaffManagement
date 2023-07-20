@@ -3,12 +3,22 @@
 namespace App\Http\Controllers;
 
 
-use App\Models\Department;
+use session;
 use App\Models\Staff;
+use App\Mail\SendEmail;
+use App\Jobs\EmailQueue;
+use App\Jobs\SendEmailJob;
+use App\Models\Department;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Mail\Message;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Jobs\SendEmailJob;
+use Illuminate\Support\Facades\Mail;
+
+use Illuminate\Support\Facades\Redirect;
 
 class AuthController extends Controller
 {
@@ -18,31 +28,52 @@ class AuthController extends Controller
         return view('login');
     }
 
-    
+   
 
-    public function login(Request $request)
-    {
+    public function login(Request $request){
 
-        $credentials = $request->only('email', 'password');
+    // if (Session::has('generated'){
+          
+    //         return redirect(route('logout'));
+    //     } 
+
+    // else{    
+    $credentials = $request->only('email', 'password');
+
         if ($credentials['email'] === 'admin' && $credentials['password'] === 'admin') {
-            // Admin authentication successful
+            // Admin login successful
             return view('home');
-        } else {
+        } 
+        else {
+            
             $credentials = $request->only('email', 'password');
 
             $staff = Staff::where('email', $credentials['email'])->first();
 
-            if ($staff && Hash::check($credentials['password'], $staff->password)) {
-                // Staff authentication successful
-                auth()->login($staff);
+            if (Auth::attempt($credentials)) {
+                
+                // generate session
+                session()->regenerate();
+                
+              
+                if ($staff && Hash::check($credentials['password'], $staff->password)) {
 
+                auth()->login($staff);
+                session(['generated' => true]);
                 return view('staff.home');
-            } else {
-                // Invalid email or password
-                return back()->withInput()->withErrors('Invalid email or password');
+                } 
+                else {
+                 // Invalid email or password
+                 return back()->withInput()->withErrors('Invalid email or password');
+                }
             }
+            else{
+             // Invalid email or password
+              return back()->withInput()->withErrors('Invalid email or password');
         }
-    }
+        }
+    // }
+}
 
 
     public function createPage()

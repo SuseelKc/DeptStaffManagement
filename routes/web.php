@@ -1,10 +1,13 @@
 <?php
 
+use App\Models\Staff;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Redirect;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\PasswordController;
+use Illuminate\Support\Facades\Session;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -16,14 +19,30 @@ use App\Http\Controllers\PasswordController;
 |
 */
 
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+// new rou
 Route::get('/', function () {
-    return view('welcome');
+    // Check if a session has been generated
+    if (session()->has('generated')) {
+      
+        return redirect()->route('staffhome');
+        
+    } else {
+        
+        return view('welcome');
+    }
 });
 
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 
 Route::post('/welcome', [AuthController::class, 'login']);
+
+// Route::post('/home', [AuthController::class, 'login']);
+
 Route::get('/create', [AuthController::class, 'createPage'])->name('home');
 //path for create department page
 Route::get('/create/department', [AuthController::class, 'createDepartment'])->name('department.create');
@@ -80,12 +99,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('staff/password', [AuthController::class, 'password'])->name('password');
     Route::put('staff/password/change', [PasswordController::class, 'ChangePassword'])->name('ChangePassword');
     Route::get('/logout', function () {
+        // Auth()->logout();
+        
         session()->invalidate();
-        session()->regenerateToken();
+        session()->regenerateToken();        
+
         return Redirect::to('/login');
     })->name('logout');
 });
 
 Route::fallback(function () {
-    return Redirect::to('/login');
+    if (session()->has('generated')) {
+        return redirect()->route('staffhome');
+    } else {
+        return view('welcome');
+    }
 });

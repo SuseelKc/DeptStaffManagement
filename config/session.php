@@ -18,6 +18,7 @@ return [
     |
     */
 
+    // changes file to database
     'driver' => env('SESSION_DRIVER', 'file'),
 
     /*
@@ -31,9 +32,11 @@ return [
     |
     */
 
-    'lifetime' => env('SESSION_LIFETIME', 120),
+    // 'lifetime' => env('SESSION_LIFETIME', 120),
+    // In here we added time of 5 min of idle time and after the peroid it logout instantly
+    'lifetime'=>10,
 
-    'expire_on_close' => false,
+    'expire_on_close' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -46,7 +49,7 @@ return [
     |
     */
 
-    'encrypt' => false,
+    'encrypt' => true,
 
     /*
     |--------------------------------------------------------------------------
