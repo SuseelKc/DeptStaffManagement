@@ -17,12 +17,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-
+use Illuminate\Contracts\Auth\Authenticatable;
 
 use Illuminate\Support\Facades\Redirect;
 
 class AuthController extends Controller
 {
+    
     public function showLoginForm()
     {
 
@@ -40,10 +41,16 @@ class AuthController extends Controller
             return view('home');
         } else {
             if (Auth::attempt($credentials)) {
+
                 $user = Auth::user();
                 //change
-                session()->regenerate();
+                // session()->regenerate();
                 session(['generated' => true]);
+
+                $user->last_session = session()->getId();
+                 
+ 
+
                 // Check if the user is an instance of the Staff model
                 if ($user instanceof Staff) {
                     // Generate a new session token and store it in the session
@@ -185,7 +192,7 @@ class AuthController extends Controller
         return view('staff.viewdetails', ['staff' => $staff]);
         }
         else {
-            return redirect()->route('login')->with('message', 'Please log in to view this page.');
+            return redirect()->route('login')->with('message', 'Please log in session expired!');
         }
     }
     public function viewdep()
@@ -196,7 +203,7 @@ class AuthController extends Controller
         return view('department.details', ['department' => $department]);
        }
        else {
-        return redirect()->route('login')->with('message', 'Please log in to view this page.');
+        return redirect()->route('login')->with('message', 'Please log in session expired!');
     }
 
 
@@ -267,7 +274,7 @@ class AuthController extends Controller
             $departmentName = Department::where('id', $username->dept_id)->value('name');
             return view('staff.profile', compact('username', 'departmentName'));
         } else {
-            return redirect()->route('login')->with('message', 'Please log in to view this page.');
+            return redirect()->route('login')->with('message', 'Please log in session expired!');
         }
     }
 

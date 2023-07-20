@@ -11,6 +11,8 @@ class CheckSessionExpiration
     {
         // Check if the staff member is logged in and has a session_token
         if (Auth::check() && Auth::user() instanceof Staff && $request->session()->has('session_token')) {
+           
+            $user = Auth::user();
             // Check if the session_token in the database matches the one in the current session
             if (Auth::user()->session_token !== $request->session()->get('session_token')) {
                 // Log out the staff member from the current session

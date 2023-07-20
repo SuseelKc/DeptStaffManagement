@@ -82,7 +82,7 @@ Route::get('/staff/{staff}/edit', [AuthController::class, 'editstaff'])->name(
 );
 Route::get('/staff', [AuthController::class, 'updatedstaff'])->name('updatedstaff');
 Route::put('/staff/{staff}/update', [AuthController::class, 'updatestaff'])->name('updatestaff');
-
+Route::group(['middleware'=>'disable_back_btn'],function(){
 Route::middleware(['auth'])->group(function () {
     Route::get('/staff/home', [AuthController::class, 'staffhome'])->name('staffhome');
     // contact
@@ -113,7 +113,7 @@ Route::middleware(['auth'])->group(function () {
         return Redirect::to('/login');
     })->name('logout');
 });
-
+}); 
 Route::fallback(function () {
     // if (session()->has('generated')) {
     //     return redirect()->route('staffhome');

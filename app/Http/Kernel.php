@@ -22,6 +22,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         // Added class of CheckSession
+        \Illuminate\Session\Middleware\AuthenticateSession::class
     ];
 
     /**
@@ -69,7 +70,11 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,  
         // 
         // 'checkSession' => \App\Http\Middleware\CheckSession::class,
-            'check.session.expiration' => \App\Http\Middleware\CheckSessionExpiration::class,
+        'check.session.expiration' => \App\Http\Middleware\CheckSessionExpiration::class,
+
+        // backbuttondisable
+        'disable_back_btn'=>\App\Http\Middleware\DisableBackBtn::class
+
     
     ];
 }
