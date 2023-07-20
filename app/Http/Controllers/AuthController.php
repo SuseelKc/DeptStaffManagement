@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
+
 use Illuminate\Support\Facades\Redirect;
 
 class AuthController extends Controller
@@ -30,50 +31,37 @@ class AuthController extends Controller
 
    
 
-    public function login(Request $request){
-
-    // if (Session::has('generated'){
-          
-    //         return redirect(route('logout'));
-    //     } 
-
-    // else{    
-    $credentials = $request->only('email', 'password');
-
+    public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+    
         if ($credentials['email'] === 'admin' && $credentials['password'] === 'admin') {
-            // Admin login successful
+            // Admin authentication successful
             return view('home');
-        } 
-        else {
-            
-            $credentials = $request->only('email', 'password');
-
-            $staff = Staff::where('email', $credentials['email'])->first();
-
+        } else {
             if (Auth::attempt($credentials)) {
-                
-                // generate session
+                $user = Auth::user();
+                //change
                 session()->regenerate();
-                
-              
-                if ($staff && Hash::check($credentials['password'], $staff->password)) {
-
-                auth()->login($staff);
                 session(['generated' => true]);
-                return view('staff.home');
-                } 
-                else {
-                 // Invalid email or password
-                 return back()->withInput()->withErrors('Invalid email or password');
+                // Check if the user is an instance of the Staff model
+                if ($user instanceof Staff) {
+                    // Generate a new session token and store it in the session
+                    $sessionToken = Str::random(60);
+                    $request->session()->put('session_token', $sessionToken);
+    
+                    // Update the session_token column in the staff table
+                    $user->update(['session_token' => $sessionToken]);
                 }
+    
+                // Redirect to the staff member's dashboard or homepage
+                return view('staff.home');
+            } else {
+                // Invalid email or password
+                return back()->withInput()->withErrors('Invalid email or password');
             }
-            else{
-             // Invalid email or password
-              return back()->withInput()->withErrors('Invalid email or password');
         }
-        }
-    // }
-}
+    }
 
 
     public function createPage()
@@ -191,15 +179,27 @@ class AuthController extends Controller
     }
     public function viewstaff()
     {
+        if (Auth::check()) {
         $DepId = Auth::user()->dept_id;
         $staff = Staff::where('dept_id', $DepId)->get();
         return view('staff.viewdetails', ['staff' => $staff]);
+        }
+        else {
+            return redirect()->route('login')->with('message', 'Please log in to view this page.');
+        }
     }
     public function viewdep()
     {
+        if (Auth::check()) {
         $department = Department::all();
 
         return view('department.details', ['department' => $department]);
+       }
+       else {
+        return redirect()->route('login')->with('message', 'Please log in to view this page.');
+    }
+
+
     }
     public function staffhome()
     {

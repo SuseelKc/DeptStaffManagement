@@ -21,6 +21,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        // Added class of CheckSession
     ];
 
     /**
@@ -36,6 +37,8 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            // added path of checksession
+            \App\Http\Middleware\CheckSessionExpiration::class,
         ],
 
         'api' => [
@@ -65,6 +68,8 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,  
         // 
-        'checkSession' => \App\Http\Middleware\CheckSession::class,
+        // 'checkSession' => \App\Http\Middleware\CheckSession::class,
+            'check.session.expiration' => \App\Http\Middleware\CheckSessionExpiration::class,
+    
     ];
 }

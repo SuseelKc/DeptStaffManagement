@@ -1,12 +1,13 @@
 <?php
 
 use App\Models\Staff;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Redirect;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\PasswordController;
-use Illuminate\Support\Facades\Session;
 
 /*
 |--------------------------------------------------------------------------
@@ -99,8 +100,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('staff/password', [AuthController::class, 'password'])->name('password');
     Route::put('staff/password/change', [PasswordController::class, 'ChangePassword'])->name('ChangePassword');
     Route::get('/logout', function () {
-        // Auth()->logout();
-        
+        $user = Auth::user();
+
+        if ($user instanceof Staff) {
+        $user->update(['session_token' => null]);
+        }
+
+        Auth::logout();
         session()->invalidate();
         session()->regenerateToken();        
 
@@ -109,9 +115,15 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::fallback(function () {
-    if (session()->has('generated')) {
-        return redirect()->route('staffhome');
-    } else {
-        return view('welcome');
-    }
+    // if (session()->has('generated')) {
+    //     return redirect()->route('staffhome');
+    // } else {
+    //     return view('welcome');
+    // }
+    return Redirect::to('/login');
 });
+Route::post('/clear-session-token', function () {
+    if (Auth::check() && Auth::user() instanceof Staff) {
+        Auth::user()->update(['session_token' => null]);
+    }
+})->middleware('auth');
